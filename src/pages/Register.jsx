@@ -25,7 +25,7 @@ const Register = () => {
     setLoading(true);
 
     try {
-      const userCredential = await createUser(email, password);
+      await createUser(email, password);
 
       await updateUserProfile(fullName, image);
 
@@ -37,15 +37,28 @@ const Register = () => {
         });
       }
 
-      setToast({ type: "success", message: "Registration successful!" });
+      setToast({
+        type: "success",
+        message: "Registration successful!",
+      });
 
       setTimeout(() => {
         navigate("/");
       }, 1500);
     } catch (error) {
+      let message = "Registration failed";
+
+      if (error.code === "auth/email-already-in-use") {
+        message = "This email is already registered. Please login instead.";
+      } else if (error.code === "auth/invalid-email") {
+        message = "Invalid email address.";
+      } else if (error.code === "auth/weak-password") {
+        message = "Password must be at least 6 characters.";
+      }
+
       setToast({
         type: "error",
-        message: error.message || "Registration failed",
+        message,
       });
     } finally {
       setLoading(false);
